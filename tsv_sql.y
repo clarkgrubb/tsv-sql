@@ -1,9 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define YYSTYPE char *
 
+char *strdupf1(const char *, char *);
 char *strdupf2(const char *, char *, char *);
 void yyerror(const char *s);
 
@@ -30,12 +32,20 @@ char *yylval;
 
 %%
 
-expr: INTEGER { top = $$ = yylval }
-| expr '+' expr { top = $$ = strdupf2("(%s + %s)", $1, $3) }
-| expr '-' expr { top = $$ = strdupf2("(%s - %s)", $1, $3) }
-| expr '*' expr { top = $$ = strdupf2("(%s * %s)", $1, $3) }
-| expr '/' expr { top = $$ = strdupf2("(%s / %s)", $1, $3) }
-| expr '%' expr { top = $$ = strdupf2("(%s % %s)", $1, $3) }
+arithmetic_expr: arithmetic_expr2 { top = $$ = $1 }
+| arithmetic_expr2 '+' arithmetic_expr { top = $$ = strdupf2("(%s + %s)", $1, $3) }
+| arithmetic_expr2 '-' arithmetic_expr { top = $$ = strdupf2("(%s - %s)", $1, $3) }
+
+arithmetic_expr2: arithmetic_expr3 { top = $$ = $1 }
+| arithmetic_expr3 '*' arithmetic_expr2 { top = $$ = strdupf2("(%s * %s)", $1, $3) }
+| arithmetic_expr3 '/' arithmetic_expr2 { top = $$ = strdupf2("(%s / %s)", $1, $3) }
+| arithmetic_expr3 '%' arithmetic_expr2 { top = $$ = strdupf2("(%s % %s)", $1, $3) }
+
+arithmetic_expr3: arithmetic_expr4 { top = $$ = $1 }
+| arithmetic_expr4 '^' arithmetic_expr3 { top = $$ = strdupf2("(%s ^ %s)", $1, $3) }
+
+arithmetic_expr4: INTEGER { top = $$ = yylval }
+| '(' arithmetic_expr ')' { top = $$ = strdupf1("(%s)", $2) }
 
 %%
 
@@ -66,5 +76,18 @@ strdupf2(const char *fmt, char *a, char *b) {
   }
   free(a);
   free(b);
+  return (c);
+}
+
+char *
+strdupf1(const char *fmt, char *a) {
+  char *c;
+  int ret;
+  ret = asprintf(&c, fmt, a);
+  if (ret < 0) {
+    fprintf(stderr, "could not allocate memory\n");
+    exit(-1);
+  }
+  free(a);
   return (c);
 }
