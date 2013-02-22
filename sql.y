@@ -30,6 +30,8 @@ char *yylval;
 %token FALSE_P
 %token FULL
 %token FROM
+%token GROUP_P
+%token HAVING
 %token INNER_P
 %token IS
 %token JOIN
@@ -48,12 +50,10 @@ char *yylval;
 %token TO
 %token TRUE_P
 %token WHEN
+%token WHERE
 
-%token GT
-%token LT
 %token GE
 %token LE
-%token EQ
 %token NE
 
 %token SCONST
@@ -106,21 +106,26 @@ join_type: FULL join_outer { top = $$ = strdup("FULL") }
 join_outer: OUTER_P {}
 | /* EMPTY */ {}
 
-join_qual: ON IDENT EQ IDENT { top = $$ = strdupf2("ON %s = %s", $2, $4) }
-| ON '(' IDENT EQ IDENT ')' { top = $$ = strdupf2("ON %s = %s", $3, $5) }
+join_qual: ON IDENT '=' IDENT { top = $$ = strdupf2("ON %s = %s", $2, $4) }
+| ON '(' IDENT '=' IDENT ')' { top = $$ = strdupf2("ON %s = %s", $3, $5) }
 
 relation_expr: IDENT {}
 
 alias_clause: AS IDENT { top = $$ = strdupf1("AS %s", $2) }
 
-/* IMPLEMENT */
-where_clause: /* EMPTY */ { top = $$ = strdup("") }
+where_clause: WHERE a_expr { top = $$ = strdupf1(" WHERE %s", $2) }
+| /* EMPTY */ { top = $$ = strdup("") }
 
 /* IMPLEMENT */
-group_clause: /* EMPTY */ { top = $$ = strdup("") }
+group_clause: GROUP_P BY expr_list { top = $$ = strdupf1(" GROUP BY %s", $3) }
+| /* EMPTY */ { top = $$ = strdup("") }
+
+expr_list: a_expr {}
+| expr_list ',' a_expr { }
 
 /* IMPLEMENT */
-having_clause: /* EMPTY */ { top = $$ = strdup("") }
+having_clause: HAVING a_expr { top = $$ = strdupf1(" HAVING %s", $2) }
+| /* EMPTY */ { top = $$ = strdup("") }
 
 sort_clause: ORDER BY sortby_list { top = $$ = strdupf1("ORDER BY %s", $3) }
 

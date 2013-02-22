@@ -21,6 +21,8 @@
 [fF][aA][lL][sS][eE] { return FALSE_P; }
 [fF][uU][lL][lL] { return FULL; }
 [fF][rR][oO][mM] { return FROM; }
+[gG][rR][oO][uU][pP] { return GROUP_P; }
+[hH][aA][vV][iI][nN][gG] { return HAVING; }
 [iI][nN][nN][eE][rR] { return INNER_P; }
 [iI][sS] { return IS; }
 [jJ][oO][iI][nN] { return JOIN; }
@@ -39,9 +41,10 @@
 [tT][oO] { return TO; }
 [tT][rR][uU][eE] { return TRUE_P; }
 [wW][hH][eE][nN] { return WHEN; }
-"<" { return LT; }
-">" { return GT; }
-"=" { return EQ; }
+[wW][hH][eE][rR][eE] { return WHERE; }
+"<" { return '<'; }
+">" { return '>'; }
+"=" { return '='; }
 "!=" { return NE; }
 "<>" { return NE; }
 "<=" { return LE; }
