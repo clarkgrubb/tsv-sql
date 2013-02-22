@@ -9,6 +9,7 @@
 %%
 
 [aA][nN][dD] { return AND; }
+[aA][sS] { return AS; }
 [aA][sS][cC] { return ASC; }
 [bB][yY] { return BY; }
 [cC][aA][sS][eE] { return CASE; }
@@ -18,12 +19,21 @@
 [eE][lL][sS][eE] { return ELSE; }
 [eE][nN][dD] { return END_P; }
 [fF][aA][lL][sS][eE] { return FALSE_P; }
+[fF][uU][lL][lL] { return FULL; }
+[fF][rR][oO][mM] { return FROM; }
+[iI][nN][nN][eE][rR] { return INNER_P; }
 [iI][sS] { return IS; }
+[jJ][oO][iI][nN] { return JOIN; }
+[lL][eE][fF][tT] { return LEFT; }
 [lL][iI][kK][eE] { return LIKE; }
 [nN][oO][tT] { return NOT; }
 [nN][uU][lL][lL] { return NULL_P; }
+[oO][nN] { return ON; }
 [oO][rR] { return OR; }
 [oO][rR][dD][eE][rR] { return ORDER; }
+[oO][uU][tT][eE][rR] { return OUTER_P; }
+[rR][iI][gG][hH][tT] { return RIGHT; }
+[sS][eE][lL][eE][cC][tT] { return SELECT; }
 [sS][iI][mM][iI][lL][aA][rR] { return SIMILAR; }
 [tT][hH][eE][nN] { return THEN; }
 [tT][oO] { return TO; }

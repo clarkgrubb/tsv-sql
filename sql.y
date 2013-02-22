@@ -7,6 +7,9 @@
 
 char *strdupf1(const char *, char *);
 char *strdupf2(const char *, char *, char *);
+char *strdupf3(const char *, char *, char *, char *);
+char *strdupf4(const char *, char *, char *, char *, char *);
+char *strdupf6(const char *, char *, char *, char *, char *, char *, char *);
 void yyerror(const char *s);
 
 char *top;
@@ -15,6 +18,7 @@ char *yylval;
 %}
 
 %token AND
+%token AS
 %token ASC
 %token BY
 %token CASE
@@ -24,12 +28,21 @@ char *yylval;
 %token ELSE
 %token END_P
 %token FALSE_P
+%token FULL
+%token FROM
+%token INNER_P
 %token IS
+%token JOIN
+%token LEFT
 %token LIKE
 %token NOT
 %token NULL_P
+%token ON
 %token OR
 %token ORDER
+%token OUTER_P
+%token RIGHT
+%token SELECT
 %token SIMILAR
 %token THEN
 %token TO
@@ -55,15 +68,61 @@ char *yylval;
 
 %%
 
- /*
-SelectStmt: simple_select {}
-| simple_select sort_clause {}
+SelectStmt: simple_select { top = $$ = $1 }
+| simple_select sort_clause { top = $$ = strdupf2("%s %s", $1, $2) }
 
-simple_select:
- */
+simple_select: SELECT opt_distinct target_list from_clause where_clause group_clause having_clause
+{ top = $$ = strdupf6("SELECT%s%s%s%s%s%s", $2, $3, $4, $5, $6, $7) }
 
+opt_distinct: DISTINCT { top = $$ = strdup(" DISTINCT") }
+     | /* EMPTY */ { top = $$ = strdup("") }
 
- /* sort_clause: ORDER BY sortby_list { top = $$ = strdupf1("ORDER BY %s", $2) }
+target_list: target_el { top = $$ = strdupf1(" %s", $1) }
+| target_list ',' target_el { top = $$ = strdupf2(" %s, %s", $1, $3) }
+
+target_el: a_expr AS ColLabel { top = $$ = strdupf2("%s AS %s", $1, $3) }
+| a_expr { top = $$ = $1 }
+| '*' { top = $$ = strdup("*")}
+
+ColLabel: IDENT {}
+
+from_clause: FROM from_list { top = $$ = strdupf1(" FROM %s", $2) }
+| /* EMPTY */ { top = $$ = strdup("")}
+
+from_list: table_ref { top = $$ = $1 }
+
+table_ref: relation_expr { top = $$ = $1 }
+| relation_expr alias_clause { top = $$ = strdupf2("%s %s", $1, $2) }
+| joined_table { top = $$ = $1 }
+
+joined_table: table_ref join_type JOIN table_ref join_qual { top = $$ = strdupf4("%s %s JOIN %s %s", $1, $2, $4, $5) }
+| table_ref JOIN table_ref join_qual { top = $$ = strdupf3("%s JOIN %s %s", $1, $3, $4) }
+
+join_type: FULL join_outer { top = $$ = strdup("FULL") }
+| LEFT join_outer { top = $$ = strdup("LEFT") }
+| RIGHT join_outer { top = $$ = strdup("RIGHT") }
+| INNER_P { top = $$ = strdup("") }
+
+join_outer: OUTER_P {}
+| /* EMPTY */ {}
+
+join_qual: ON IDENT EQ IDENT { top = $$ = strdupf2("ON %s = %s", $2, $4) }
+| ON '(' IDENT EQ IDENT ')' { top = $$ = strdupf2("ON %s = %s", $3, $5) }
+
+relation_expr: IDENT {}
+
+alias_clause: AS IDENT { top = $$ = strdupf1("AS %s", $2) }
+
+/* IMPLEMENT */
+where_clause: /* EMPTY */ { top = $$ = strdup("") }
+
+/* IMPLEMENT */
+group_clause: /* EMPTY */ { top = $$ = strdup("") }
+
+/* IMPLEMENT */
+having_clause: /* EMPTY */ { top = $$ = strdup("") }
+
+sort_clause: ORDER BY sortby_list { top = $$ = strdupf1("ORDER BY %s", $3) }
 
 sortby_list: sortby { top = $$ = $1 }
 | sortby_list ',' sortby { top = $$ = strdupf2("%s, %s", $1, $3) }
@@ -71,7 +130,8 @@ sortby_list: sortby { top = $$ = $1 }
 sortby: a_expr opt_asc_desc { top = $$ = strdupf2("%s %s", $1, $2) }
 
 opt_asc_desc: ASC { top = $$ = strdup("ASC") }
-| DESC { top = $$ = strdup("DESC") } */
+| DESC { top = $$ = strdup("DESC") }
+| /* EMPTY */ { top = $$ = strdup("") }
 
 a_expr: c_expr { top = $$ = $1 }
 | '+' a_expr { top = $$ = strdupf1("(+ %s)", $2) }
@@ -179,5 +239,67 @@ strdupf2(const char *fmt, char *a, char *b) {
   }
   free(a);
   free(b);
+  return (c);
+}
+
+char *
+strdupf3(const char *fmt,
+         char *s1,
+         char *s2,
+         char *s3) {
+  char *c;
+  int ret;
+  ret = asprintf(&c, fmt, s1, s2, s3);
+  if (ret < 0) {
+    fprintf(stderr, "could not allocate memory\n");
+    exit(-1);
+  }
+  free(s1);
+  free(s2);
+  free(s3);
+  return (c);
+}
+
+char *
+strdupf4(const char *fmt,
+         char *s1,
+         char *s2,
+         char *s3,
+         char *s4) {
+  char *c;
+  int ret;
+  ret = asprintf(&c, fmt, s1, s2, s3, s4);
+  if (ret < 0) {
+    fprintf(stderr, "could not allocate memory\n");
+    exit(-1);
+  }
+  free(s1);
+  free(s2);
+  free(s3);
+  free(s4);
+  return (c);
+}
+
+char *
+strdupf6(const char *fmt,
+         char *s1,
+         char *s2,
+         char *s3,
+         char *s4,
+         char *s5,
+         char *s6) {
+  char *c;
+  int ret;
+  ret = asprintf(&c, fmt, s1, s2, s3, s4, s5, s6);
+  if (ret < 0) {
+    fprintf(stderr, "could not allocate memory\n");
+    exit(-1);
+  }
+  free(s1);
+  free(s2);
+  free(s3);
+  free(s4);
+  free(s5);
+  free(s6);
   return (c);
 }
