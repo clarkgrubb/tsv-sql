@@ -1,16 +1,16 @@
-tsv-sql: tsv_sql.tab.c lex.yy.c
-	gcc lex.yy.c tsv_sql.tab.c -o tsv-sql
+tsv-sql: sql.tab.c lex.yy.c
+	gcc lex.yy.c sql.tab.c -o tsv-sql
 
-tsv_sql.tab.c: tsv_sql.y
-	bison -d tsv_sql.y
+sql.tab.c: sql.y
+	bison -d sql.y
 
-tsv_sql.tab.h: tsv_sql.tab.c
+sql.tab.h: sql.tab.c
 
-lex.yy.c: tsv_sql.lex tsv_sql.tab.h
-	flex tsv_sql.lex
+lex.yy.c: sql.l sql.tab.h
+	flex sql.l
 
 clobber: clean
 	rm tsv-sql
 
 clean:
-	rm -f tsv_sql.tab.c tsv_sql.tab.h lex.yy.c
+	rm -f sql.tab.c sql.tab.h lex.yy.c
