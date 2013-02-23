@@ -51,6 +51,7 @@
 "<>" { return NE; }
 "<=" { return LE; }
 ">=" { return GE; }
+"||" { return CONCAT; }
 "," { return ','; }
 "(" { return '('; }
 ")" { return ')'; }
@@ -60,7 +61,7 @@
 "/" { return '/'; }
 "%" { return '%'; }
 "^" { return '^'; }
-\"([^\"]|\\.)*\" { yylval = strdup(yytext); return SCONST; }
+\"(\\.|\"\"|[^"\n])*\" { yylval = strdup(yytext); return SCONST; }
 -?[0-9]*\.[0-9]+ { yylval = strdup(yytext); return FCONST; }
 -?[0-9]+\.[0-9]* { yylval = strdup(yytext); return FCONST; }
 -?[0-9]+ { yylval = strdup(yytext); return ICONST; }
