@@ -1,6 +1,6 @@
 %{
 #define YYSTYPE char *
-#include "sql.tab.h"
+#include "grammar.h"
 
 %}
 

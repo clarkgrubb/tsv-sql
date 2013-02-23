@@ -1,16 +1,54 @@
-tsv-sql: sql.tab.c lex.yy.c tsv-sql.c
-	gcc lex.yy.c sql.tab.c tsv-sql.c -o tsv-sql
+CC := gcc
 
-sql.tab.c: sql.y
-	bison -d sql.y
+CFLAGS :=
 
-sql.tab.h: sql.tab.c
+BISON := bison
 
-lex.yy.c: sql.l sql.tab.h
-	flex sql.l
+BISONFLAGS :=
+
+FLEX := flex
+
+FLEXFLAGS :=
+
+
+HEADERS :=
+
+GENERATED_HEADERS := grammar.h
+
+ALL_HEADERS := $(HEADERS) $(GENERATED_HEADERS)
+
+
+SOURCES := tsv-sql.c
+
+GENERATED_SOURCES := tokens.c grammar.c
+
+ALL_SOURCES := $(SOURCES) $(GENERATED_SOURCES)
+
+
+OBJECTS := $(patsubst %.c,%.o,$(ALL_SOURCES))
+
+TARGET := tsv-sql
+
+# Always recompile if a header changes
+#
+$(TARGET): $(OBJECTS) $(ALL_HEADERS)
+	$(CC) $(OBJECTS) -o $@
+
+grammar.h: grammar.c
 
 clobber: clean
-	rm tsv-sql
+	-rm $(TARGET)
 
 clean:
-	rm -f sql.tab.c sql.tab.h lex.yy.c
+	-rm $(OBJECTS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
+
+# Always recompile if a header changes
+#
+%.o: %.c $(ALL_HEADERS)
+	$(CC) $(CFLAGS) -c $<
+
+%.c: %.y
+	$(BISON) -d $(BISONFLAGS) -o $@ $<
+
+%.c: %.l $(HEADERS)
+	$(FLEX) $(FLEXFLAGS) -o $@ $<
