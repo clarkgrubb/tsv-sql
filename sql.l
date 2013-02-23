@@ -28,8 +28,10 @@
 [jJ][oO][iI][nN] { return JOIN; }
 [lL][eE][fF][tT] { return LEFT; }
 [lL][iI][kK][eE] { return LIKE; }
+[lL][iI][mM][iI][tT] { return LIMIT; }
 [nN][oO][tT] { return NOT; }
 [nN][uU][lL][lL] { return NULL_P; }
+[oO][fF][fF][sS][eE][tT] { return OFFSET; }
 [oO][nN] { return ON; }
 [oO][rR] { return OR; }
 [oO][rR][dD][eE][rR] { return ORDER; }

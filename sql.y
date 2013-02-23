@@ -37,8 +37,10 @@ char *yylval;
 %token JOIN
 %token LEFT
 %token LIKE
+%token LIMIT
 %token NOT
 %token NULL_P
+%token OFFSET
 %token ON
 %token OR
 %token ORDER
@@ -69,7 +71,8 @@ char *yylval;
 %%
 
 SelectStmt: simple_select { top = $$ = $1 }
-| simple_select sort_clause { top = $$ = strdupf2("%s %s", $1, $2) }
+| simple_select opt_select_limit { top = $$ = strdupf2("%s %s", $1, $2) }
+| simple_select sort_clause opt_select_limit { top = $$ = strdupf3("%s %s %s", $1, $2, $3) }
 
 simple_select: SELECT opt_distinct target_list from_clause where_clause group_clause having_clause
 { top = $$ = strdupf6("SELECT%s%s%s%s%s%s", $2, $3, $4, $5, $6, $7) }
@@ -137,6 +140,18 @@ sortby: a_expr opt_asc_desc { top = $$ = strdupf2("%s %s", $1, $2) }
 opt_asc_desc: ASC { top = $$ = strdup("ASC") }
 | DESC { top = $$ = strdup("DESC") }
 | /* EMPTY */ { top = $$ = strdup("") }
+
+opt_select_limit: select_limit { top = $$ = $1 }
+| /* EMPTY */ { top = $$ = strdup("") }
+
+select_limit: limit_clause offset_clause { top = $$ = strdupf2("%s%s", $1, $2) }
+| offset_clause limit_clause { top = $$ = strdupf2("%s%s", $1, $2) }
+| limit_clause { top = $$ = $1 }
+| offset_clause { top = $$ = $1 }
+
+limit_clause: LIMIT a_expr { top = $$ = strdupf1(" LIMIT %s", $2)}
+
+offset_clause: OFFSET a_expr { top = $$ = strdupf1(" OFFSET %s", $2) }
 
 a_expr: c_expr { top = $$ = $1 }
 | '+' a_expr { top = $$ = strdupf1("(+ %s)", $2) }
