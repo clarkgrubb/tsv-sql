@@ -221,16 +221,6 @@ func_arg_expr: a_expr { $$ = $1 }
 
 %%
 
-int
-main(int argc, char **argv) {
-  char *awk;
-  if ( 0 == yyparse() ) {
-    printf("awk: %s\n", top);
-  } else {
-    fprintf(stderr, "parse failed\n");
-  }
-}
-
 void
 yyerror (const char *s)
 {

@@ -1,5 +1,5 @@
-tsv-sql: sql.tab.c lex.yy.c
-	gcc lex.yy.c sql.tab.c -o tsv-sql
+tsv-sql: sql.tab.c lex.yy.c tsv-sql.c
+	gcc lex.yy.c sql.tab.c tsv-sql.c -o tsv-sql
 
 sql.tab.c: sql.y
 	bison -d sql.y
