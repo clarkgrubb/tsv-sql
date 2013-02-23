@@ -64,6 +64,9 @@
 \"(\\.|\"\"|[^"\n])*\" { yylval = strdup(yytext); return SCONST; }
 -?[0-9]*\.[0-9]+ { yylval = strdup(yytext); return FCONST; }
 -?[0-9]+\.[0-9]* { yylval = strdup(yytext); return FCONST; }
+-?[0-9]+[eE][-+]?[0-9]+ { yylval = strdup(yytext); return FCONST; }
+-?[0-9]+"."[0-9]*[eE][-+]?[0-9]+ { yylval = strdup(yytext); return FCONST; }
+-?"."[0-9]+[eE][-+]?[0-9]+ { yylval = strdup(yytext); return FCONST; }
 -?[0-9]+ { yylval = strdup(yytext); return ICONST; }
 [a-zA-Z][a-zA-Z0-9_]* {yylval = strdup(yytext); return IDENT; }
 [ \t\n]+          /* eat up whitespace */
