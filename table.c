@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <libgen.h>
 #include <regex.h>
@@ -114,6 +115,7 @@ read_columns(char *path) {
   FILE *f = fopen(path, "r");
 
   if (!f) {
+    fprintf(stderr, "[ERROR] opening file %s", path);
     perror("[ERROR] could not open file");
     return NULL;
   }
@@ -133,20 +135,22 @@ read_columns(char *path) {
 
   trim(line);
 
-  printf("DEBUG before split\n");
-
   char **headers = split(line, FIELD_SEPARATOR);
 
   column *columns = NULL;
-  column *last_col, *col;
+  column *col = NULL;
 
   int i;
 
-  printf("DEBUG before for loop\n");
-
   for (i = 0; headers[i]; ++i) {
 
-    col = read_column(headers[i]);
+    if (!col) {
+      col = read_column(headers[i]);
+    }
+    else {
+      col->next = read_column(headers[i]);
+      col = col->next;
+    }
 
     if (!col) {
       return NULL;
@@ -155,9 +159,6 @@ read_columns(char *path) {
     if (!columns) {
       columns = col;
     }
-
-    last_col->next = col;
-    last_col = col;
   }
 
   free(line);
@@ -181,5 +182,22 @@ read_table(char *path) {
 
   tab->columns = read_columns(path);
 
+  tab->next = NULL;
+
   return tab;
+}
+
+void
+print_table(FILE *fout, table *tbl) {
+
+  assert(tbl);
+
+  fprintf(fout, "table: %s (%s)\n", tbl->name, tbl->filename);
+
+  column *col;
+
+  for (col = tbl->columns; col; col = col->next) {
+    fprintf(fout, "  %s{%s}\n", col->name, col->type);
+  }
+
 }

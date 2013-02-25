@@ -13,5 +13,6 @@ column *read_columns(char *path);
 
 table *read_table(char *path);
 
+void print_table(FILE *fout, table *tbl);
 
 #endif
