@@ -32,6 +32,8 @@ START_TEST(test_read_column) {
   column *col = read_column("foo");
 
   fail_unless(strcmp(col->name, "foo") == 0, "name is not \"foo\"");
+  fail_unless(strcmp(col->type, "text") == 0, "type is not \"text\"");
+  fail_unless(col->next == NULL, "next is not NULL");
 }
 END_TEST
 
@@ -39,7 +41,9 @@ START_TEST(test_read_column_with_type) {
 
   column *col = read_column("baz{int}");
 
+  fail_unless(strcmp(col->name, "baz") == 0, "name is not \"baz\"");
   fail_unless(strcmp(col->type, "int") == 0, "type is not \"int\"");
+  fail_unless(col->next == NULL, "next is not NULL");
 }
 END_TEST
 
@@ -48,6 +52,23 @@ START_TEST(test_read_column_invalid_name) {
   column *col = read_column("$$$");
 
   fail_unless(col == NULL, "col is not NULL");
+}
+END_TEST
+
+START_TEST(test_read_columns) {
+
+  /* FIXME: generate a temp file */
+  column *cols = read_columns("/tmp/baz.tsv");
+
+  fail_unless(cols, "cols is NULL");
+  fail_unless(strcmp(cols->name, "foo") == 0, "cols->name is not \"foo\"");
+  fail_unless(strcmp(cols->type, "text") == 0, "cols->text is not \"text\"");
+  fail_unless(cols->next, "cols->next is NULL");
+  fail_unless(strcmp(cols->next->name, "bar") == 0,
+              "cols->name is not \"bar\"");
+  fail_unless(strcmp(cols->next->type, "text") == 0,
+              "cols->text is not \"text\"");
+  fail_unless(cols->next->next == NULL, "cols->next->next is not NULL");
 }
 END_TEST
 
@@ -61,6 +82,7 @@ suite_table(void) {
   TCase *tc4 = tcase_create("case: read_column");
   TCase *tc5 = tcase_create("case: read_column with type");
   TCase *tc6 = tcase_create("case: read_column invalid name");
+  TCase *tc7 = tcase_create("case: read_columns");
 
   tcase_add_test(tc1, test_path_to_name);
   suite_add_tcase(ste, tc1);
@@ -79,6 +101,9 @@ suite_table(void) {
 
   tcase_add_test(tc6, test_read_column_invalid_name);
   suite_add_tcase(ste, tc6);
+
+  tcase_add_test(tc7, test_read_columns);
+  suite_add_tcase(ste, tc7);
 
   return ste;
 }

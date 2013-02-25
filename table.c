@@ -10,7 +10,7 @@
 
 const char *TABLE_SUFFIX = ".tsv";
 
-/* Should types be enums?  We would still need a string to int map. */
+/* FIXME: Should types be enums?  We would still need a string to int map. */
 const char *DEFAULT_TYPE = "text";
 
 char FIELD_SEPARATOR = '\t';
@@ -111,7 +111,14 @@ read_columns(char *path) {
   size_t cap = 0;
   ssize_t len;
 
-  len = getline(&line, &cap, stdin);
+  FILE *f = fopen(path, "r");
+
+  if (!f) {
+    perror("[ERROR] could not open file");
+    return NULL;
+  }
+
+  len = getline(&line, &cap, f);
 
   if (len == -1) {
     if (ferror(stdin)) {
@@ -126,12 +133,16 @@ read_columns(char *path) {
 
   trim(line);
 
+  printf("DEBUG before split\n");
+
   char **headers = split(line, FIELD_SEPARATOR);
 
   column *columns = NULL;
   column *last_col, *col;
 
   int i;
+
+  printf("DEBUG before for loop\n");
 
   for (i = 0; headers[i]; ++i) {
 
