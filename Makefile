@@ -1,6 +1,6 @@
 CC := gcc
 
-CFLAGS :=
+CFLAGS := -g
 
 BISON := bison
 
@@ -18,17 +18,20 @@ GENERATED_HEADERS := grammar.h
 ALL_HEADERS := $(HEADERS) $(GENERATED_HEADERS)
 
 
-SOURCES := engine.c main.c backend.c table.c
+SOURCES := engine.c backend.c table.c util.c
 
 GENERATED_SOURCES := tokens.c grammar.c
 
-ALL_SOURCES := $(SOURCES) $(GENERATED_SOURCES)
+ALL_LIB_SOURCES := $(SOURCES) $(GENERATED_SOURCES)
+
+ALL_SOURCES := main.c $(ALL_LIB_SOURCES)
 
 
-TEST_SOURCES := check_table.c
+TEST_SOURCES := check_table.c check_util.c
 
 TEST_TARGETS := $(patsubst %.c,%,$(TEST_SOURCES))
 
+LIB_OBJECTS := $(patsubst %.c,%.o,$(ALL_LIB_SOURCES))
 
 OBJECTS := $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -46,13 +49,22 @@ clobber: clean
 	-rm $(TARGET)
 
 clean:
-	-rm $(OBJECTS) $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(TEST_TARGETS)
+	-rm $(OBJECTS) $(GENERATED_SOURCES) $(GENERATED_HEADERS) \
+	$(TEST_TARGETS)
 
-$(TEST_TARGETS): table.o
-	gcc -o check_table table.o check_table.c -lcheck
+# Can we define a rule to build a test target?
+#
+$(TEST_TARGETS): $(LIB_OBJECTS) $(TEST_SOURCES) $(ALL_HEADERS)
+	gcc -o check_table $(LIB_OBJECTS) check_table.c -lcheck
+	gcc -o check_util $(LIB_OBJECTS) check_util.c -lcheck
 
 test: $(TEST_TARGETS)
 	./check_table
+	./check_util
+
+valgrind: $(TEST_TARGETS)
+	valgrind ./check_table
+	valgrind ./check_util
 
 # Always recompile if a header changes
 #

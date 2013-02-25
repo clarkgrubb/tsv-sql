@@ -1,47 +1,27 @@
 #include <ctype.h>
 #include <libgen.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 #include "engine.h"
+#include "util.h"
 
 const char *TABLE_SUFFIX = ".tsv";
 
+/* Should types be enums?  We would still need a string to int map. */
+const char *DEFAULT_TYPE = "text";
+
 char FIELD_SEPARATOR = '\t';
 
-void
-trim(char *s) {
+/* Should match IDENT in tokens.l.
+   Note that max identifier and type lengths are 100 */
 
-  char *first = s;
-  size_t i;
+#define IDENT_BUFSIZE 101
 
-  while (isspace(*first)) {
-    ++first;
-  }
-
-  int lede = first - s;
-
-  if (lede) {
-
-    for (i = 0; s + lede + i; ++i) {
-      s[i] = s[lede + i];
-    }
-
-    s[i] = s[lede + i];
-
-  }
-
-  i = strlen(s) - 1;
-
-  /* could i be -1 here? */
-
-  while(isspace(s[i])) {
-    --i;
-  }
-
-  s[i] = '\0';
-}
+const char *HEADER_REGEX =
+  "^([a-zA-Z][a-zA-Z0-9_]{1,99})(\\{[a-zA-Z]{1,100}\\})?$";
 
 char *
 path_to_name(char *path) {
@@ -51,12 +31,12 @@ path_to_name(char *path) {
   size_t suffix_index = strlen(base) - strlen(TABLE_SUFFIX);
 
   if (suffix_index < 1) {
-    fprintf(stderr, "Name too short: %s", path);
+    fprintf(stderr, "[ERROR] Name too short: %s\n", path);
     return NULL;
   }
 
   if (strcasecmp(base + suffix_index, TABLE_SUFFIX)) {
-    fprintf(stderr, "Suffix not .tsv: %s", path);
+    fprintf(stderr, "[ERROR] Suffix not .tsv: %s\n", path);
     return NULL;
   }
 
@@ -67,15 +47,59 @@ path_to_name(char *path) {
 }
 
 column *
-read_column(char **rest_of_line) {
+read_column(char *header) {
 
-  char *loc = index(*rest_of_line, FIELD_SEPARATOR);
+  regex_t rx;
+  int retval;
 
-  if (!loc) {
+  if (retval = regcomp(&rx, HEADER_REGEX, REG_EXTENDED)) {
 
+    char buf[200];
+
+    regerror(retval, &rx, buf, 200);
+    fprintf(stderr, "Regex error: %s\n", buf);
+
+    return NULL;
   }
+  else {
 
-  /* implement me */
+    regmatch_t matches[3];
+
+    matches[2].rm_so = -1;
+
+    if (regexec(&rx, header, 3, matches, 0) == 0) {
+
+      char name[IDENT_BUFSIZE];
+      char type[IDENT_BUFSIZE];
+      regmatch_t rm = matches[1];
+
+      strncpy(name, header + rm.rm_so, rm.rm_eo - rm.rm_so);
+      name[rm.rm_eo - rm.rm_so + 1] = '\0';
+
+      rm = matches[2];
+
+      if (matches[2].rm_so != -1) {
+
+        /* there was a type in curly braces { } */
+
+        strncpy(type, header + rm.rm_so + 1, rm.rm_eo - rm.rm_so - 2);
+        type[rm.rm_eo - rm.rm_so - 2] = '\0';
+      }
+      else {
+        strcpy(type, "text");
+      }
+
+      column *col = malloc(sizeof(column));
+
+      col->name = strdup(name);
+      col->type = strdup(type);
+      col->next = NULL;
+
+      return col;
+    }
+
+    regfree(&rx);
+  }
 
   return NULL;
 }
@@ -91,21 +115,31 @@ read_columns(char *path) {
 
   if (len == -1) {
     if (ferror(stdin)) {
-      perror("getline err: %s\n");
+      perror("[ERROR] getline: %s\n");
     }
     else if (feof(stdin)) {
-      fprintf(stderr, "end of file\n");
+      fprintf(stderr, "[ERROR] end of file\n");
     }
 
     return NULL;
   }
 
-  char *rest = line;
+  trim(line);
+
+  char **headers = split(line, FIELD_SEPARATOR);
 
   column *columns = NULL;
   column *last_col, *col;
 
-  while (col = read_column(&rest)) {
+  int i;
+
+  for (i = 0; headers[i]; ++i) {
+
+    col = read_column(headers[i]);
+
+    if (!col) {
+      return NULL;
+    }
 
     if (!columns) {
       columns = col;
@@ -116,6 +150,7 @@ read_columns(char *path) {
   }
 
   free(line);
+  free_split_array(headers);
 
   return columns;
 }

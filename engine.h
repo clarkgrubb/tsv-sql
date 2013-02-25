@@ -1,11 +1,11 @@
 #ifndef ENGINE_H_
 #define ENGINE_H_
 
-typedef int column_type;
+/* should column.type be an enum */
 
 typedef struct column {
   char *name;
-  column_type type;
+  char *type;
   struct column *next;
 } column;
 
