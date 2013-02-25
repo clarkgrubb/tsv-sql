@@ -1,6 +1,8 @@
 #ifndef TABLE_H_
 #define TABLE_H_
 
+#include <stdio.h>
+
 #include "engine.h"
 
 char *path_to_name(char *path);
