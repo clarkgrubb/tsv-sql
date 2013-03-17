@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "engine.h"
+#include "ir.h"
 #include "table.h"
 
 extern char *top;

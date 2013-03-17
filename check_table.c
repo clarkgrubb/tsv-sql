@@ -1,7 +1,42 @@
 #include <check.h>
+#include <limits.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "table.h"
+
+
+
+char *
+make_temporary_file(char *template, int suffix_len, char *contents) {
+
+  char buf[PATH_MAX];
+
+  strcpy(buf, template);
+
+  int fd = mkstemps(buf, suffix_len);
+
+  if (fd != -1) {
+    FILE *f = fdopen(fd, "w");
+
+    if (NULL == f) {
+      perror("fdopen failed");
+      return NULL;
+    } else {
+      fputs(contents, f);
+      if (fclose(f) == EOF) {
+        perror("failed to close temp file");
+        return NULL;
+      }
+      return strdup(buf);
+    }
+
+  } else {
+    perror("mkstemp failed");
+    return NULL;
+  }
+}
 
 START_TEST(test_path_to_name) {
 
@@ -57,13 +92,15 @@ END_TEST
 
 START_TEST(test_read_columns) {
 
-  /* FIXME: generate a temp file */
-  column *cols = read_columns("/tmp/baz.tsv");
+  char *path = make_temporary_file("/tmp/check_table.XXXX.tsv",
+                                   4,
+                                   "foo\tbar\none\ttwo");
+  column *cols = read_columns(path);
 
-  fail_unless(cols, "cols is NULL");
+  fail_unless(cols != NULL, "cols is NULL");
   fail_unless(strcmp(cols->name, "foo") == 0, "cols->name is not \"foo\"");
   fail_unless(strcmp(cols->type, "text") == 0, "cols->text is not \"text\"");
-  fail_unless(cols->next, "cols->next is NULL");
+  fail_unless(cols->next != NULL, "cols->next is NULL");
   fail_unless(strcmp(cols->next->name, "bar") == 0,
               "cols->name is not \"bar\"");
   fail_unless(strcmp(cols->next->type, "text") == 0,
