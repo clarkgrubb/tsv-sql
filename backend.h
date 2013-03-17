@@ -36,6 +36,6 @@ typedef struct step {
 } step;
 
 int
-substitute_tmpfiles(char *buf, char *fmt, step *prerequisites);
+format_step(char *buf, char *fmt, step *step);
 
 #endif

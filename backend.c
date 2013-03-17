@@ -12,17 +12,50 @@
 
 char cmd_buf[MAX_CMD_LEN];
 
-/*  'fmt' can contain the %s style format specifier.  The %% style
- *  escape sequence is also honored.
+/*  'fmt' can contain these specifiers:
+ *
+ *     %i: step.tmpfile_prerequisites.tmpfile
+ *     %o: step.tmpfile
+ *     %%: %
  */
 int
-substitute_tmpfiles(char *buf, char *fmt, step *prerequisites) {
+format_step(char *buf, char *fmt, step *stp) {
 
   /* TODO: buffer offerflow problems? */
 
+  if (!buf) {
+    fprintf(stderr, "[ERROR] format_step(): buf was NULL\n");
+    return FAILURE;
+  }
+
+  if (!fmt) {
+    fprintf(stderr, "[ERROR] format_step(): fmt was NULL\n");
+    return FAILURE;
+  }
+
+  if (!stp) {
+    fprintf(stderr, "[ERROR] format_step(): stp was NULL\n");
+    return FAILURE;
+  }
+
   char *bufp = buf;
   char *fmtp = fmt;
-  step *prereq = prerequisites;
+  step *prereq = stp->tmpfile_prerequisites;
+  int tmpfile_len;
+
+  if (stp->stdin_prerequisite) {
+
+    if (format_step(buf,
+                    stp->stdin_prerequisite->stdout_cmd_fmt,
+                    stp->stdin_prerequisite) == FAILURE) {
+      return FAILURE;
+    }
+
+    int buflen = strlen(buf);
+
+    strncpy(buf + buflen, " | ", 3);
+    bufp = buf + buflen + 3;
+  }
 
   while (1) {
 
@@ -31,7 +64,8 @@ substitute_tmpfiles(char *buf, char *fmt, step *prerequisites) {
     if (p == NULL) {
 
       if (prereq) {
-        fprintf(stderr, "more tmpfiles than %%s specifiers\n");
+        fprintf(stderr, "[ERROR] format_step(): "
+                "more tmpfile_prerequisites than %%i specifiers\n");
         return FAILURE;
       }
       else {
@@ -53,19 +87,32 @@ substitute_tmpfiles(char *buf, char *fmt, step *prerequisites) {
         bufp++;
         fmtp = p + 2;
         break;
-      case 's':
+      case 'i':
         if (!prereq) {
-          fprintf(stderr, "more %%s specifiers than tmpfiles\n");
+          fprintf(stderr, "[ERROR] format_step(): "
+                  "more %%i specifiers than tmpfile_prerequisites\n");
           return FAILURE;
         }
-        int tmpfile_len = strlen(prereq->tmpfile);
+        tmpfile_len = strlen(prereq->tmpfile);
         strncpy(bufp, prereq->tmpfile, tmpfile_len);
         bufp += tmpfile_len;
         prereq = prereq->next;
         fmtp = p + 2;
         break;
+      case 'o':
+        if (!stp->tmpfile) {
+          fprintf(stderr, "[ERROR] format_step(): "
+                  "tmpfile for step was not set.\n");
+          return FAILURE;
+        }
+        tmpfile_len = strlen(stp->tmpfile);
+        strncpy(bufp, stp->tmpfile, tmpfile_len);
+        bufp += tmpfile_len;
+        fmtp = p + 2;
+        break;
       default:
-        fprintf(stderr, "unrecognized format specifier: %%%d\n", *(p + 1));
+        fprintf(stderr, "[ERROR] format_step(): "
+                "unrecognized format specifier: %%%c\n", *(p + 1));
         return FAILURE;
       }
     }
@@ -107,9 +154,9 @@ execute_stdout_step(step *stp) {
     execute_tmpfile_step(tmpfile_step);
   }
 
-  if (substitute_tmpfiles(cmd_buf,
-                          stp->stdout_cmd_fmt,
-                          stp->tmpfile_prerequisites) == SUCCESS) {
+  if (format_step(cmd_buf,
+                  stp->stdout_cmd_fmt,
+                  stp) == SUCCESS) {
     printf("[DEBUG]: about to execute: %s\n", cmd_buf);
     int retval = system(cmd_buf);
     return retval;
@@ -136,10 +183,10 @@ execute_tmpfile_step(step *stp) {
   }
 
   /* TODO: must generate a tmpfile name, set stp->tmpfile, and pass
-   *  it to substitute_tmpfiles()
+   *  it to format_step()
    */
 
-  if (substitute_tmpfiles(cmd_buf, stp->tmpfile_cmd_fmt, stp) == SUCCESS) {
+  if (format_step(cmd_buf, stp->tmpfile_cmd_fmt, stp) == SUCCESS) {
     int retval = system(cmd_buf);
     return retval;
   }
