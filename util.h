@@ -1,6 +1,8 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+char *make_tmpfile();
+
 void trim(char *s);
 
 char **split(char *s, char delim);

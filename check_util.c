@@ -1,4 +1,5 @@
 #include <check.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "util.h"
@@ -76,6 +77,16 @@ START_TEST(test_split_empty) {
 }
 END_TEST
 
+START_TEST(test_make_tmpfile) {
+
+  char *tmpfile = make_tmpfile();
+
+  fail_unless(strncasecmp(tmpfile, "/tmp/tsv-sql.", 13) == 0,
+              "beginning of tmpfile is not /tmp/tsv-sql.");
+
+}
+END_TEST
+
 
 Suite *
 suite_util(void) {
@@ -86,6 +97,7 @@ suite_util(void) {
   TCase *tc4 = tcase_create("case: split");
   TCase *tc5 = tcase_create("case: split no delim");
   TCase *tc6 = tcase_create("case: split empty");
+  TCase *tc7 = tcase_create("case: make_tmpfile");
 
   tcase_add_test(tc1, test_trim);
   suite_add_tcase(ste, tc1);
@@ -104,6 +116,9 @@ suite_util(void) {
 
   tcase_add_test(tc6, test_split_empty);
   suite_add_tcase(ste, tc6);
+
+  tcase_add_test(tc7, test_make_tmpfile);
+  suite_add_tcase(ste, tc7);
 
   return ste;
 }

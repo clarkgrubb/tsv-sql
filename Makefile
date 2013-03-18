@@ -54,12 +54,12 @@ clean:
 
 # Can we define a rule to build a test target?
 #
-$(TEST_TARGETS): $(LIB_OBJECTS) $(TEST_SOURCES) $(ALL_HEADERS)
+test_targets: $(LIB_OBJECTS) $(TEST_SOURCES) $(ALL_HEADERS)
 	gcc -o check_backend $(LIB_OBJECTS) check_backend.c -lcheck
 	gcc -o check_table $(LIB_OBJECTS) check_table.c -lcheck
 	gcc -o check_util $(LIB_OBJECTS) check_util.c -lcheck
 
-test: $(TEST_TARGETS)
+test: test_targets
 	./check_backend
 	./check_table
 	./check_util

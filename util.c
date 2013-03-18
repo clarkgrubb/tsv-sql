@@ -1,6 +1,33 @@
 #include <ctype.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <strings.h>
+
+const char *make_tmpfile_template = "/tmp/tsv-sql.XXXXX.tsv";
+const int make_tmpfile_suffix_length = 4;
+
+char *
+make_tmpfile() {
+
+  char buf[PATH_MAX];
+
+  strcpy(buf, make_tmpfile_template);
+
+  int fd = mkstemps(buf, make_tmpfile_suffix_length);
+
+  if (fd != -1) {
+
+    if (close(fd) == -1) {
+      perror("failed to close temp file");
+      return NULL;
+    }
+    return strdup(buf);
+
+  } else {
+    perror("mkstemp failed");
+    return NULL;
+  }
+}
 
 void
 trim(char *s) {

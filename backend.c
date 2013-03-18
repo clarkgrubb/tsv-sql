@@ -6,6 +6,7 @@
 #include "backend.h"
 #include "def.h"
 #include "ir.h"
+#include "util.h"
 
 /* FIXME research what this value should be */
 #define MAX_CMD_LEN 20000
@@ -149,8 +150,6 @@ execute_stdout_step(step *stp) {
        tmpfile_step;
        tmpfile_step = tmpfile_step->next) {
 
-    /* generate a tempfile; set tmpfile_step->tmpfile */
-
     execute_tmpfile_step(tmpfile_step);
   }
 
@@ -177,16 +176,13 @@ execute_tmpfile_step(step *stp) {
        tmpfile_step;
        tmpfile_step = tmpfile_step->next) {
 
-    /* generate a tempfile; set tmpfile_step->tmpfile */
-
     execute_tmpfile_step(tmpfile_step);
   }
 
-  /* TODO: must generate a tmpfile name, set stp->tmpfile, and pass
-   *  it to format_step()
-   */
+  stp->tmpfile = make_tmpfile();
 
   if (format_step(cmd_buf, stp->tmpfile_cmd_fmt, stp) == SUCCESS) {
+    printf("[DEBUG]: about to execute: %s\n", cmd_buf);
     int retval = system(cmd_buf);
     return retval;
   }
