@@ -164,7 +164,7 @@ END_TEST
 
 Suite *
 suite_engine(void) {
-  Suite *ste = suite_create("suite: backend");
+  Suite *ste = suite_create("suite: engine");
   TCase *tc1 = tcase_create("case: format_step_too_few_specifiers");
   TCase *tc2 = tcase_create("case: format_step_too_many_specifiers");
   TCase *tc3 = tcase_create("case: format_step");
