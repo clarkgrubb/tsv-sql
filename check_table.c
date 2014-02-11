@@ -92,7 +92,7 @@ END_TEST
 
 START_TEST(test_read_columns) {
 
-  char *path = make_temporary_file("/tmp/check_table.XXXX.tsv",
+  char *path = make_temporary_file("/tmp/check_table.XXXXXX.tsv",
                                    4,
                                    "foo\tbar\none\ttwo");
   column *cols = read_columns(path);
