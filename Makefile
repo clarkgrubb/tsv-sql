@@ -20,7 +20,7 @@ generated_sources := tokens.c grammar.c
 all_lib_sources := $(sources) $(generated_sources)
 all_sources := main.c $(all_lib_sources)
 test_sources := check_engine.c check_table.c check_relation.c check_util.c
-test_targets := $(patsubst %.c,%,$(test_sources))
+test_targets := $(patsubst check_%.c,%.check,$(test_sources))
 lib_objects := $(patsubst %.c,%.o,$(all_lib_sources))
 objects := $(patsubst %.c,%.o,$(all_sources))
 target := tsql
@@ -49,17 +49,16 @@ clean:
 
 # Can we define a rule to build a test target?
 #
-test_targets: $(lib_objects) $(test_sources) $(all_headers)
-	gcc -o check_engine $(lib_objects) check_engine.c $(test_libs)
-	gcc -o check_relation $(lib_objects) check_relation.c $(test_libs)
-	gcc -o check_table $(lib_objects) check_table.c $(test_libs)
-	gcc -o check_util $(lib_objects) check_util.c $(test_libs)
+%.check: check_%.c $(test_sources) $(all_headers) $(lib_objects)
+	gcc -o $@ $(lib_objects) $< $(test_libs)
+
+test_targets: $(test_targets)
 
 test: test_targets
-	./check_engine
-	./check_relation
-	./check_table
-	./check_util
+	./engine.check
+	./relation.check
+	./table.check
+	./util.check
 
 valgrind: $(test_targets)
 	valgrind ./check_engine
