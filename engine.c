@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "backend.h"
+#include "engine.h"
 #include "def.h"
-#include "ir.h"
+#include "table.h"
+#include "relation.h"
 #include "util.h"
 
 /* FIXME research what this value should be */
@@ -141,6 +142,32 @@ join_type_to_join_flag(join_type jt) {
 }
 
 int
+execute_tmpfile_step(step *stp) {
+
+  step *tmpfile_step;
+  char *tmpfile;
+
+  for (tmpfile_step = stp->tmpfile_prerequisites;
+       tmpfile_step;
+       tmpfile_step = tmpfile_step->next) {
+
+    execute_tmpfile_step(tmpfile_step);
+  }
+
+  stp->tmpfile = make_tmpfile();
+
+  if (format_step(cmd_buf, stp->tmpfile_cmd_fmt, stp) == SUCCESS) {
+    printf("[DEBUG]: about to execute: %s\n", cmd_buf);
+    int retval = system(cmd_buf);
+    return retval;
+  }
+  else {
+    /* TODO error msg */
+    return FAILURE;
+  }
+}
+
+int
 execute_stdout_step(step *stp) {
 
   step *tmpfile_step;
@@ -167,37 +194,24 @@ execute_stdout_step(step *stp) {
 }
 
 int
-execute_tmpfile_step(step *stp) {
-
-  step *tmpfile_step;
-  char *tmpfile;
-
-  for (tmpfile_step = stp->tmpfile_prerequisites;
-       tmpfile_step;
-       tmpfile_step = tmpfile_step->next) {
-
-    execute_tmpfile_step(tmpfile_step);
-  }
-
-  stp->tmpfile = make_tmpfile();
-
-  if (format_step(cmd_buf, stp->tmpfile_cmd_fmt, stp) == SUCCESS) {
-    printf("[DEBUG]: about to execute: %s\n", cmd_buf);
-    int retval = system(cmd_buf);
-    return retval;
-  }
-  else {
-    /* TODO error msg */
-    return FAILURE;
-  }
-}
-
-/*
-int
 execute_join(query *qry, join *join) {
 
   assert(qry);
   assert(join);
+
+  /* TODO: how do we set these?
+   */
+  int left_numeric = 0;
+  int right_numeric = 0;
+
+  table *left_table = table_name_to_table(qry->tables,
+                                          join->left_table_name);
+  table *right_table = table_name_to_table(qry->tables,
+                                           join->right_table_name);
+  int left_column_number = column_name_to_number(left_table,
+                                                 join->left_column_name);
+  int right_column_number = column_name_to_number(right_table,
+                                                 join->right_column_name);
 
   // what about header?
   snprintf(cmd_buf, MAX_CMD_LEN, "sort %s -t $'\\t' -k %d,%d %s > %s",
@@ -246,4 +260,3 @@ execute_join(query *qry, join *join) {
 
   return SUCCESS;
 }
-*/

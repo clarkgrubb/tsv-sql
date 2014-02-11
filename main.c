@@ -1,10 +1,15 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "ir.h"
 #include "table.h"
+#include "relation.h"
 
 extern char *top;
+
+/* TODO: declare these elsewhere...
+ */
+int yyparse();
+void yy_scan_string(char *);
 
 int
 main(int argc, char **argv) {
@@ -13,7 +18,7 @@ main(int argc, char **argv) {
 
   if (argc == 1) {
     printf("USAGE: tsv-sql SELECT_STMT [FILE.tsv ...]\n");
-    return -1;
+    return 1;
   }
 
   char *select_stmt = argv[1];

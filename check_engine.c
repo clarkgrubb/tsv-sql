@@ -1,7 +1,7 @@
 #include <check.h>
 #include <string.h>
 
-#include "backend.h"
+#include "engine.h"
 #include "def.h"
 
 START_TEST(test_format_step_too_few_specifiers) {
@@ -160,7 +160,7 @@ START_TEST(test_execute_stdout_step_tmpfile) {
 END_TEST
 
 Suite *
-suite_util(void) {
+suite_engine(void) {
   Suite *ste = suite_create("suite: backend");
   TCase *tc1 = tcase_create("case: format_step_too_few_specifiers");
   TCase *tc2 = tcase_create("case: format_step_too_many_specifiers");
@@ -193,7 +193,7 @@ suite_util(void) {
 int
 main(void) {
   int number_failed;
-  Suite *ste = suite_util();
+  Suite *ste = suite_engine();
   SRunner *sr = srunner_create(ste);
 
   srunner_run_all(sr, CK_NORMAL);

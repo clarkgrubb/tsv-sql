@@ -1,5 +1,5 @@
-#ifndef BACKEND_H_
-#define BACKEND_H_
+#ifndef ENGINE_H_
+#define ENGINE_H_
 
 /*
  *    stdout_cmd_fmt
@@ -37,5 +37,8 @@ typedef struct step {
 
 int
 format_step(char *buf, char *fmt, step *step);
+
+int
+execute_stdout_step(step *stp) {
 
 #endif

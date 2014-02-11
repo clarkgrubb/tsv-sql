@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ir.h"
+#include "table.h"
 #include "util.h"
 
 const char *TABLE_SUFFIX = ".tsv";
