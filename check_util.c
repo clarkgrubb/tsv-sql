@@ -81,8 +81,8 @@ START_TEST(test_make_tmpfile) {
 
   char *tmpfile = make_tmpfile();
 
-  fail_unless(strncasecmp(tmpfile, "/tmp/tsv-sql.", 13) == 0,
-              "beginning of tmpfile is not /tmp/tsv-sql.");
+  fail_unless(strncasecmp(tmpfile, "/tmp/tsql.", 10) == 0,
+              "beginning of tmpfile is not /tmp/tsql.");
 
 }
 END_TEST
