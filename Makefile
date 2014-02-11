@@ -60,6 +60,9 @@ test: test_targets
 	./table.check
 	./util.check
 
+harness: $(target)
+	./$(target) 'select * from input' data/input.tsv
+
 valgrind: $(test_targets)
 	valgrind ./check_engine
 	valgrind ./check_relation

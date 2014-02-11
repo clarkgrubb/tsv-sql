@@ -77,13 +77,6 @@ typedef struct relation join;
 
 /* table alias to table map */
 
-/*  Columns are numbered 1, 2, ...
- *
- *  Returns 0 if no column by that name.
- */
-int
-column_name_to_number(table *tbl, char *column_name);
-
 /* Returns NULL if table not found.
  */
 table *

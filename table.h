@@ -31,6 +31,12 @@ table *new_table();
 
 void table_print(table *tbl, FILE *fout);
 
+/*  Columns are numbered 1, 2, ...
+ *  Returns NO_SUCH_COLUMN if no column by that name.
+ */
+int
+table_column_number(table *tbl, char *column_name);
+
 /* Internal routines which are declared
  * for unit tests.
  */

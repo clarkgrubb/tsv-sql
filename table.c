@@ -10,6 +10,7 @@
 #include "util.h"
 
 const char *TABLE_SUFFIX = ".tsv";
+const int NO_SUCH_COLUMN = 0;
 
 /* FIXME: Should types be enums?  We would still need a string to int map. */
 const char *DEFAULT_TYPE = "text";
@@ -188,7 +189,7 @@ new_table_from_path(char *path) {
 }
 
 void
-print_table(FILE *fout, table *tbl) {
+table_print(table *tbl, FILE *fout) {
 
   assert(tbl);
 
@@ -200,4 +201,24 @@ print_table(FILE *fout, table *tbl) {
     fprintf(fout, "  %s{%s}\n", col->name, col->type);
   }
 
+}
+
+/*  Columns are numbered 1, 2, ...
+ *
+ *  Returns NO_SUCH_COLUMN if appropriate.
+ */
+int
+table_column_number(table *tbl, char *column_name) {
+
+  column *col;
+  int col_num;
+
+  for (col = tbl->columns, col_num = 1; col; col = col->next, ++col_num) {
+
+    if (strcmp(column_name, col->name) == 0) {
+      return col_num;
+    }
+  }
+
+  return NO_SUCH_COLUMN;
 }

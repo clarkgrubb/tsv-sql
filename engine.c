@@ -208,9 +208,9 @@ execute_join(query *qry, join *join) {
                                              join->left_relation_name);
   table *right_relation = table_name_to_table(qry->tables,
                                               join->right_relation_name);
-  int left_column_number = column_name_to_number(left_table,
-                                                 join->left_column_name);
-  int right_column_number = column_name_to_number(right_table,
+  int left_column_number = table_column__number(left_table,
+                                               join->left_column_name);
+  int right_column_number = table_column_number(right_table,
                                                  join->right_column_name);
 
   // what about header?

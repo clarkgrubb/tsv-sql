@@ -49,7 +49,7 @@ main(int argc, char **argv) {
     printf("[DEBUG] parses as: %s\n", top);
 
     for (tbl = qry.tables; tbl; tbl = tbl->next) {
-      print_table(stdout, tbl);
+      table_print(tbl, stdout);
     }
 
   } else {

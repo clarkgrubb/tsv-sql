@@ -1,6 +1,6 @@
 * (DONE) rename check_% to %.check
 * (DONE) rule for compiling %.check
-* clean unit tests
+* (DONE) clean unit tests
 * declare functions in relation.h and table.h
 * implement functions in relation.c and table.c
 * unit tests in check_table and check_relation
