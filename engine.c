@@ -167,6 +167,7 @@ execute_tmpfile_step(step *stp) {
   }
 }
 
+
 int
 execute_stdout_step(step *stp) {
 
@@ -187,27 +188,26 @@ execute_stdout_step(step *stp) {
     int retval = system(cmd_buf);
     return retval;
   }
-  else {
-    /* TODO error msg */
-    return FAILURE;
-  }
+  // TODO error msg
+  return FAILURE;
 }
 
+/*
 int
 execute_join(query *qry, join *join) {
 
   assert(qry);
   assert(join);
 
-  /* TODO: how do we set these?
-   */
+  // TODO: how do we set these?
+  //
   int left_numeric = 0;
   int right_numeric = 0;
 
-  table *left_table = table_name_to_table(qry->tables,
-                                          join->left_table_name);
-  table *right_table = table_name_to_table(qry->tables,
-                                           join->right_table_name);
+  table *left_relation = table_name_to_table(qry->tables,
+                                             join->left_relation_name);
+  table *right_relation = table_name_to_table(qry->tables,
+                                              join->right_relation_name);
   int left_column_number = column_name_to_number(left_table,
                                                  join->left_column_name);
   int right_column_number = column_name_to_number(right_table,
@@ -260,3 +260,4 @@ execute_join(query *qry, join *join) {
 
   return SUCCESS;
 }
+*/

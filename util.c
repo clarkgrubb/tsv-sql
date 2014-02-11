@@ -1,7 +1,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 const char *make_tmpfile_template = "/tmp/tsv-sql.XXXXX.tsv";
 const int make_tmpfile_suffix_length = 4;

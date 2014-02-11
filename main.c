@@ -26,18 +26,18 @@ main(int argc, char **argv) {
   int i;
 
   query qry;
-  qry.tables = NULL;
+  table *tables = NULL;
 
   table *tbl = NULL;
 
   for (i = 2; i < argc; ++i) {
     if (!tbl) {
-      tbl = read_table(argv[i]);
+      tbl = new_table_from_path(argv[i]);
       assert(tbl);
       qry.tables = tbl;
     }
     else {
-      tbl->next = read_table(argv[i]);
+      tbl->next = new_table_from_path(argv[i]);
       assert(tbl->next);
       tbl = tbl->next;
     }

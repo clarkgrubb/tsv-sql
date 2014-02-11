@@ -168,7 +168,7 @@ read_columns(char *path) {
 }
 
 table *
-read_table(char *path) {
+new_table_from_path(char *path) {
 
   table *tab = malloc(sizeof(table));
 

@@ -9,7 +9,7 @@ typedef enum column_type { STRING } column_type;
 
 typedef struct column {
   char *name;
-  column_type type;
+  char *type; /* change to column_type and fix read_column() */
   struct column *next;
 } column;
 

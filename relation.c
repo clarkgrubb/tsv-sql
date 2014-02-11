@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-#include "ir.h"
+#include "relation.h"
+#include "table.h"
 
 const int NO_SUCH_COLUMN = 0;
 

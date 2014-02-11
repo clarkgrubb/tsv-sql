@@ -39,6 +39,6 @@ int
 format_step(char *buf, char *fmt, step *step);
 
 int
-execute_stdout_step(step *stp) {
+execute_stdout_step(step *stp);
 
 #endif

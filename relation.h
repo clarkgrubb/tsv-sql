@@ -1,5 +1,7 @@
-#ifndef ENGINE_H_
-#define ENGINE_H_
+#ifndef RELATION_H_
+#define RELATION_H_
+
+#include "table.h"
 
 typedef enum { TABLE, JOIN, QUERY } relation_type;
 typedef enum join_type { INNER, LEFT, RIGHT, FULL } join_type;
@@ -58,6 +60,7 @@ typedef struct relation {
   enum join_type join_type;
 
   /* type: QUERY */
+  table *tables;             /* how do we handle subqueries? */
   struct relation *joins;
   struct target *targets;
   struct expression where;
@@ -69,9 +72,8 @@ typedef struct relation {
   int offset;                /* actually an expr... */
 } relation;
 
-typedef struct relation table;
-typedef struct relation join;
 typedef struct relation query;
+typedef struct relation join;
 
 /* table alias to table map */
 

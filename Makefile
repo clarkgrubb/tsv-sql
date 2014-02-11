@@ -1,3 +1,10 @@
+MAKEFLAGS += --warn-undefined-variables
+SHELL := /bin/bash
+.SHELLFLAGS := -eu -o pipefail
+.DEFAULT_GOAL := all
+.DELETE_ON_ERROR:
+.SUFFIXES:
+
 CC := gcc
 CFLAGS := -g
 BISON := bison
@@ -5,43 +12,48 @@ BISONFLAGS :=
 FLEX := flex
 FLEXFLAGS :=
 
-
-HEADERS := engine.h def.h relation.h table.h util.h
-GENERATED_HEADERS := grammar.h
-ALL_HEADERS := $(HEADERS) $(GENERATED_HEADERS)
-SOURCES := engine.c relation.c table.c util.c
-GENERATED_SOURCES := tokens.c grammar.c
-ALL_LIB_SOURCES := $(SOURCES) $(GENERATED_SOURCES)
-ALL_SOURCES := main.c $(ALL_LIB_SOURCES)
-TEST_SOURCES := check_engine.c check_table.c check_util.c
-TEST_TARGETS := $(patsubst %.c,%,$(TEST_SOURCES))
-LIB_OBJECTS := $(patsubst %.c,%.o,$(ALL_LIB_SOURCES))
-OBJECTS := $(patsubst %.c,%.o,$(ALL_SOURCES))
-TARGET := tsv-sql
+headers := engine.h def.h relation.h table.h util.h
+generated_headers := grammar.h
+all_headers := $(headers) $(generated_headers)
+sources := engine.c relation.c table.c util.c
+generated_sources := tokens.c grammar.c
+all_lib_sources := $(sources) $(generated_sources)
+all_sources := main.c $(all_lib_sources)
+test_sources := check_engine.c check_table.c check_relation.c check_util.c
+test_targets := $(patsubst %.c,%,$(test_sources))
+lib_objects := $(patsubst %.c,%.o,$(all_lib_sources))
+objects := $(patsubst %.c,%.o,$(all_sources))
+target := tsql
+apt_pkgs := bison flex check
+test_libs := -lcheck -lm -lrt -pthread
 
 .PHONY: test
 
+# run as sudo
+ubuntu.setup:
+	apt-get install $(apt_pkgs)
+
 # Always recompile if a header changes
 #
-$(TARGET): $(OBJECTS) $(ALL_HEADERS)
-	$(CC) $(OBJECTS) -o $@
+$(target): $(objects) $(all_headers)
+	$(CC) $(objects) -o $@
 
 grammar.h: grammar.c
 
 clobber: clean
-	-rm $(TARGET)
+	-rm $(target)
 
 clean:
-	-rm $(OBJECTS) $(GENERATED_SOURCES) $(GENERATED_HEADERS) \
-	$(TEST_TARGETS)
+	-rm $(objects) $(generated_sources) $(generated_headers) \
+	$(test_targets)
 
 # Can we define a rule to build a test target?
 #
-test_targets: $(LIB_OBJECTS) $(TEST_SOURCES) $(ALL_HEADERS)
-	gcc -o check_engine $(LIB_OBJECTS) check_engine.c -lcheck
-	gcc -o check_relation $(LIB_OBJECTS) check_relation.c -lcheck
-	gcc -o check_table $(LIB_OBJECTS) check_table.c -lcheck
-	gcc -o check_util $(LIB_OBJECTS) check_util.c -lcheck
+test_targets: $(lib_objects) $(test_sources) $(all_headers)
+	gcc -o check_engine $(lib_objects) check_engine.c $(test_libs)
+	gcc -o check_relation $(lib_objects) check_relation.c $(test_libs)
+	gcc -o check_table $(lib_objects) check_table.c $(test_libs)
+	gcc -o check_util $(lib_objects) check_util.c $(test_libs)
 
 test: test_targets
 	./check_engine
@@ -49,7 +61,7 @@ test: test_targets
 	./check_table
 	./check_util
 
-valgrind: $(TEST_TARGETS)
+valgrind: $(test_targets)
 	valgrind ./check_engine
 	valgrind ./check_relation
 	valgrind ./check_table
@@ -57,11 +69,13 @@ valgrind: $(TEST_TARGETS)
 
 # Always recompile if a header changes
 #
-%.o: %.c $(ALL_HEADERS)
+%.o: %.c $(all_headers)
 	$(CC) $(CFLAGS) -c $<
 
 %.c: %.y
 	$(BISON) -d $(BISONFLAGS) -o $@ $<
 
-%.c: %.l $(HEADERS)
+%.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS) -o $@ $<
+
+all: $(target)

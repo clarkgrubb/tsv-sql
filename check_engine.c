@@ -1,5 +1,8 @@
 #include <check.h>
+#include <math.h>
+#include <pthread.h>
 #include <string.h>
+#include <time.h>
 
 #include "engine.h"
 #include "def.h"
