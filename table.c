@@ -188,6 +188,16 @@ new_table_from_path(char *path) {
   return tab;
 }
 
+table *
+new_table_with_tmp_path() {
+  table *tab = (table *)malloc(sizeof(table));
+  tab->filename = make_tmpfile();
+  tab->name = NULL;
+  tab->next = NULL;
+  tab->columns = NULL;
+  return tab;
+}
+
 void
 table_print(table *tbl, FILE *fout) {
 
@@ -221,4 +231,20 @@ table_column_number(table *tbl, char *column_name) {
   }
 
   return NO_SUCH_COLUMN;
+}
+
+/* Returns NULL if table not found.
+ */
+table *
+table_name_to_table(table *tables, char *table_name) {
+
+  table *tbl;
+
+  for (tbl = tables; tbl; tbl = tbl->next) {
+    if (strcmp(table_name, tbl->name) == 0) {
+      return tbl;
+    }
+  }
+
+  return NULL;
 }

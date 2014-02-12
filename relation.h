@@ -61,7 +61,7 @@ typedef struct relation {
 
   /* type: QUERY */
   table *tables;             /* how do we handle subqueries? */
-  struct relation *joins;
+  struct relation *joins;    /* NULL if no FROMclause; table relation if FROM but no JOIN */
   struct target *targets;
   struct expression where;
   char **where_table_names;  /* so that we know how soon we can apply where filter */
@@ -72,15 +72,47 @@ typedef struct relation {
   int offset;                /* actually an expr... */
 } relation;
 
+/* TODO: do we need these? */
 typedef struct relation query;
 typedef struct relation join;
 
-/* table alias to table map */
+void
+relation_print(relation *rel);
 
-/* Returns NULL if table not found.
+query *
+new_query();
+
+/* returns SUCCESS
  */
-table *
-table_name_to_table(table *tables, char *table_name);
+int
+query_add_table(table *tbl);
 
+/* returns SUCCESS
+ */
+int
+query_set_from_relation(table *tbl);
+
+/* returns FAILURE if no FROM relation.
+ */
+int
+query_add_join_relation();
+
+int
+query_set_where();
+
+int
+query_set_order_by();
+
+int
+query_set_group_by();
+
+int
+query_set_having();
+
+int
+query_set_limit();
+
+int
+query_set_offset();
 
 #endif

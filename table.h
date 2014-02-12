@@ -24,10 +24,11 @@ typedef struct table {
   struct column *columns;
 } table;
 
+table *
+new_table_from_path(char *path);
 
-table *new_table_from_path(char *path);
-
-table *new_table();
+table *
+new_table_with_tmp_path();
 
 void table_print(table *tbl, FILE *fout);
 
@@ -36,6 +37,11 @@ void table_print(table *tbl, FILE *fout);
  */
 int
 table_column_number(table *tbl, char *column_name);
+
+/* Walk thru linked list of tables.  Returns NULL if table not found.
+ */
+table *
+get_table_by_name(table *tables, char *table_name);
 
 /* Internal routines which are declared
  * for unit tests.

@@ -1,20 +1,38 @@
 #include <stdio.h>
 
+#include "def.h"
 #include "relation.h"
 #include "table.h"
 
-/* Returns NULL if table not found.
+void
+relation_print(relation *rel) {
+
+}
+
+query *
+new_query() {
+
+}
+
+/* returns SUCCESS
  */
-table *
-table_name_to_table(table *tables, char *table_name) {
+int
+query_add_table(table *tbl) {
 
-  table *tbl;
+  return SUCCESS;
+}
 
-  for (tbl = tables; tbl; tbl = tbl->next) {
-    if (strcmp(table_name, tbl->name) == 0) {
-      return tbl;
-    }
-  }
+/* returns SUCCESS
+ */
+int
+query_set_from_relation(table *tbl) {
 
-  return NULL;
+  return SUCCESS;
+}
+
+/* returns FAILURE if no FROM relation.
+ */
+int
+query_add_join_relation() {
+  return SUCCESS;
 }
