@@ -1,7 +1,9 @@
 tsv-sql
 =======
 
-Execute a SQL SELECT statement at the command line on TSV files
+Execute a SQL SELECT statement at the command line on TSV files.
+
+This code is incomplete.
 
 IR ISSUES
 =========
