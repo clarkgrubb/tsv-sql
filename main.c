@@ -45,6 +45,8 @@ main(int argc, char **argv) {
 
   yy_scan_string(select_stmt);
 
+  return yyparse();
+
   if ( 0 == yyparse() ) {
     printf("[DEBUG] parses as: %s\n", top);
 
